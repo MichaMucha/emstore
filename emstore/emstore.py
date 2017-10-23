@@ -1,0 +1,2 @@
+class Emstore:
+    pass
