@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  emstore:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        buildno: 1
+    command: jupyter notebook --ip=0.0.0.0 --no-browser --allow-root
+    volumes:
+      - ./dev:/app/dev
+    ports:
+      - 8888:8888
