@@ -26,8 +26,8 @@ class DownloadGloveTestSuite(unittest.TestCase):
         self.assertTrue(os.path.exists(test_target_path))
 
     def test_download_glove1000(self):
-        test_url = ('https://github.com/MichaMucha' +
-                    '/emstore/tests/glove_sample/glove_1000.zip')
+        test_url = ('https://github.com/MichaMucha/' +
+                    'emstore/raw/master/tests/glove_sample/glove_1000.zip')
         test_target_path = os.path.join(TEST_GLOVE_DIR, 'glove.zip')
         emstore.glove.download(target_path=test_target_path, url=test_url)
         self.assertTrue(os.path.exists(test_target_path))
