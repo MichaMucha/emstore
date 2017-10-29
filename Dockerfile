@@ -10,6 +10,7 @@ RUN pip install plyvel
 RUN conda install jupyter -y
 RUN apt-get install -y libsnappy1 libsnappy-dev
 RUN pip install tqdm
+RUN pip install pytest
 
 WORKDIR /app
 ADD . /app

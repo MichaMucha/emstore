@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import os
 import unittest
 from subprocess import call
 
-from .context import TEST_DB_PATH, emstore
+from .context import SAMPLE_DATA, TEST_DB_PATH, emstore
 
 
 class LoadAndReadTestSuite(unittest.TestCase):
@@ -12,20 +13,21 @@ class LoadAndReadTestSuite(unittest.TestCase):
     def setUp(self):
         super().setUp()
         emstore.create_embedding_database(
-            'glove_sample/glove_1000.zip',
+            os.path.join(SAMPLE_DATA, 'glove_1000.zip'),
             TEST_DB_PATH,
             datasize=1000,
             overwrite=True)
 
     def test_open(self):
-        self.embeddings = emstore.Emstore(TEST_DB_PATH)
-        print(emstore.Emstore.__doc__)
-        self.assertFalse(emstore.closed)
-        print(self.embeddings)
+        with emstore.Emstore(TEST_DB_PATH) as embeddings:
+            print(emstore.Emstore.__doc__)
+            self.assertFalse(embeddings.closed)
+            print(embeddings)
 
     def test_read(self):
-        self.embeddings = emstore.Emstore(TEST_DB_PATH)
-        print(self.embeddings['the'])
+        embeddings = emstore.Emstore(TEST_DB_PATH)
+        print(embeddings['the'])
+        embeddings.close()
 
     def tearDown(self):
         call(['rm', '-rf', TEST_DB_PATH])
