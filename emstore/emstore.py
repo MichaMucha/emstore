@@ -1,3 +1,4 @@
+from functools import lru_cache
 from inspect import currentframe, getargvalues
 
 import plyvel
@@ -48,6 +49,7 @@ class Emstore(object):
         return """<Emstore path:{} lock:{}>""".format(self.path,
                                                       not self.closed)
 
+    @lru_cache(maxsize=1024)
     def __getitem__(self, key):
         return _read(key, self.db)
 
