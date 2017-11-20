@@ -91,9 +91,11 @@ def create_embedding_database(embeddings_file,
     if overwrite:
         if os.path.exists(path_to_database):
             call(['rm', '-rf', path_to_database])
+    if not os.path.exists(path_to_database):
+        os.makedirs(path_to_database)
     with open_leveldb(
             path_to_database,
-            create_if_missing=overwrite,
+            create_if_missing=True,
             error_if_exists=not overwrite) as db:
         leveldb_write_batch = 256
         i = 0
