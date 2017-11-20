@@ -50,9 +50,8 @@ def create(embeddings_file=None, path_to_db=None, keep_file=True):
             archive not found at default path.
             Commencing 2.03GB download.
             File will be deleted after DB is created.
-            //default path is:
-            {}
-            '''.format(DEFAULT_GLOVE_DOWNLOAD_PATH))
+            default download path is:
+            {}'''.format(DEFAULT_GLOVE_DOWNLOAD_PATH))
             download()
             embeddings_file = DEFAULT_GLOVE_DOWNLOAD_PATH
             keep_file = False

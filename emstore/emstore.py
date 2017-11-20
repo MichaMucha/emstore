@@ -86,6 +86,5 @@ def _read(key, db):
     """Read from leveldb and return array of floats.
     """
     key = key.encode('utf8')
-    embedding = db.get(key)
-    embedding.split(b' ')
+    embedding = db.get(key).split(b' ')
     return [float(e) for e in embedding]
