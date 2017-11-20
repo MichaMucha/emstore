@@ -1,3 +1,5 @@
 nose
 sphinx
 plyvel
+tqdm
+pytest

@@ -15,4 +15,6 @@ RUN pip install pytest
 WORKDIR /app
 ADD . /app
 
+RUN python setup.py install
+
 CMD jupyter notebook --ip=0.0.0.0 --no-browser --allow-root
