@@ -5,6 +5,8 @@ import unittest
 from subprocess import call
 
 from .context import emstore
+from .context import glove
+from .context import emstore
 
 TEST_GLOVE_DIR = os.path.join('/', 'tmp', 'glove')
 
