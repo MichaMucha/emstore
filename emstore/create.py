@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+import struct
+from functools import partial
 from contextlib import contextmanager
 from functools import partial
 from io import BufferedReader, UnsupportedOperation
@@ -10,6 +12,8 @@ from zipfile import BadZipFile, ZipFile
 from tqdm import tqdm
 
 from emstore.open import open_leveldb
+
+STRUCT_FORMAT = 'e'
 
 
 class VecIOWrapper(BufferedReader):
@@ -23,20 +27,22 @@ class VecIOWrapper(BufferedReader):
                     '''Unable to infer vector size without read loss.
                     Please specify vector size''')
         self.vector_size = vector_size
+        self.pack = struct.Struct(str(vector_size) + STRUCT_FORMAT).pack
 
     def __next__(self):
         line = super().__next__()[:-1]  # read and drop newline char
         x = line.split(b' ')  # split by whitespace
         if len(x) > self.vector_size + 1:
-            return [b''.join(x[:-self.vector_size])], b' '.join(
-                x[-self.vector_size:])
+            k, v = b''.join(x[:-self.vector_size]), x[-self.vector_size:]
         else:
-            return x[0], b' '.join(x[1:])
+            k, v = x[0], x[1:]
+        v = [float(f) for f in v]
+        return k, self.pack(*v)
 
     def infer_vector_size(self):
         # sample 1 entry
         first_line = super().readline()
-        first_line.split(b' ')
+        first_line = first_line.split(b' ')
         self.seek(0)
         return len(first_line) - 1
 

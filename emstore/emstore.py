@@ -1,8 +1,10 @@
-from functools import lru_cache
+from functools import lru_cache, partial
 from inspect import currentframe, getargvalues
 
 import plyvel
+import struct
 
+STRUCT_FORMAT = 'e'
 
 class Emstore(object):
     """docstring for Emstore"""
@@ -37,7 +39,12 @@ class Emstore(object):
                 'bloom_filter_bits', 'comparator', 'comparator_name'
             ]
         }
+        db = plyvel.DB(name, **kwargs)
+        vector = struct.iter_unpack(STRUCT_FORMAT, next(db.__iter__())[1])
+        vector_size = len(list(vector))
+        db.close()
         self.db = plyvel.DB(name, **kwargs)
+        self.unpack = struct.Struct(str(vector_size) + STRUCT_FORMAT).unpack
 
     def __enter__(self):
         return self
@@ -51,16 +58,22 @@ class Emstore(object):
 
     @lru_cache(maxsize=1024)
     def __getitem__(self, key):
-        return _read(key, self.db)
+        return self.__read(key)
 
     def __iter__(self):
-        pass
+        return self.db.__iter__()
 
     def __contains__(self, item):
         pass
 
     def __len__(self):
         pass
+
+    def __read(self, key):
+        """Read from leveldb and return array of floats.
+        """
+        key = key.encode('utf8')
+        return self.unpack(self.db.get(key))
 
     def close(self):
         self.db.close()
@@ -80,11 +93,3 @@ class Emstore(object):
         return locals()
 
     closed = property(**closed())
-
-
-def _read(key, db):
-    """Read from leveldb and return array of floats.
-    """
-    key = key.encode('utf8')
-    embedding = db.get(key).split(b' ')
-    return [float(e) for e in embedding]

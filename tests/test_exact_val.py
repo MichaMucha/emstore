@@ -25,29 +25,26 @@ class LoadAndReadTestSuite(unittest.TestCase):
             print(embeddings)
 
     def test_the(self):
-        embeddings = emstore.Emstore(TEST_DB_PATH)
-        the = embeddings['the']
-        self.assertEqual(len(the), 300)
-        self.assertEqual(the[10], -0.35179)
-        self.assertEqual(the[73], 0.17856)
-        self.assertEqual(the[299], 0.1323)
-        embeddings.close()
+        with emstore.Emstore(TEST_DB_PATH) as embeddings:
+            the = embeddings['the']
+            self.assertAlmostEqual(len(the), 300)
+            self.assertAlmostEqual(the[10], -0.35179)
+            self.assertAlmostEqual(the[73], 0.17856)
+            self.assertAlmostEqual(the[299], 0.1323)
 
     def test_about(self):
-        embeddings = emstore.Emstore(TEST_DB_PATH)
-        about = embeddings['about']
-        self.assertEqual(len(about), 300)
-        self.assertEqual(about[231], 0.26429)
-        self.assertEqual(about[45], 0.34683)
-        embeddings.close()
+        with emstore.Emstore(TEST_DB_PATH) as embeddings:
+            about = embeddings['about']
+            self.assertAlmostEqual(len(about), 300)
+            self.assertAlmostEqual(about[231], 0.26429)
+            self.assertAlmostEqual(about[45], 0.34683)
 
     def test_people(self):
-        embeddings = emstore.Emstore(TEST_DB_PATH)
-        people = embeddings['people']
-        self.assertEqual(len(people), 300)
-        self.assertEqual(people[163], 0.22873)
-        self.assertEqual(people[11], 0.070743)
-        embeddings.close()
+        with emstore.Emstore(TEST_DB_PATH) as embeddings:
+            people = embeddings['people']
+            self.assertAlmostEqual(len(people), 300)
+            self.assertAlmostEqual(people[163], 0.22873)
+            self.assertAlmostEqual(people[11], 0.070743)
 
     def tearDown(self):
         call(['rm', '-rf', TEST_DB_PATH])

@@ -25,9 +25,8 @@ class LoadAndReadTestSuite(unittest.TestCase):
             print(embeddings)
 
     def test_read(self):
-        embeddings = emstore.Emstore(TEST_DB_PATH)
-        print(embeddings['the'])
-        embeddings.close()
+        with emstore.Emstore(TEST_DB_PATH) as embeddings:
+            print(embeddings['the'])
 
     def tearDown(self):
         call(['rm', '-rf', TEST_DB_PATH])
