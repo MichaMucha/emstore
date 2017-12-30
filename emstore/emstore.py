@@ -42,6 +42,7 @@ class Emstore(object):
         db = plyvel.DB(name, **kwargs)
         vector = struct.iter_unpack(STRUCT_FORMAT, next(db.__iter__())[1])
         vector_size = len(list(vector))
+        self.vector_size = vector_size
         db.close()
         self.db = plyvel.DB(name, **kwargs)
         self.unpack = struct.Struct(str(vector_size) + STRUCT_FORMAT).unpack
@@ -61,7 +62,20 @@ class Emstore(object):
         return self.__read(key)
 
     def __iter__(self):
-        return self.db.__iter__()
+        # return self.db.__iter__()
+        with self.db.iterator() as it:
+            for k, v in it:
+                yield k.decode('utf-8'), self.__read(v)
+
+    def keys(self):
+        with self.db.iterator(include_value=False) as it:
+            for key in it:
+                yield key.decode('utf-8')
+
+    def values(self):
+        with self.db.iterator(include_key=False) as it:
+            for value in it:
+                yield self.__read(v)
 
     def __contains__(self, item):
         pass
@@ -73,7 +87,12 @@ class Emstore(object):
         """Read from leveldb and return array of floats.
         """
         key = key.encode('utf8')
-        return self.unpack(self.db.get(key))
+        try:
+            val = self.unpack(self.db.get(key))
+        except TypeError:
+            val = [0.] * self.vector_size
+        return val
+
 
     def close(self):
         self.db.close()
