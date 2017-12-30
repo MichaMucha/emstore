@@ -65,7 +65,7 @@ class Emstore(object):
         # return self.db.__iter__()
         with self.db.iterator() as it:
             for k, v in it:
-                yield k.decode('utf-8'), self.__read(v)
+                yield k.decode('utf-8'), self.unpack(v)
 
     def keys(self):
         with self.db.iterator(include_value=False) as it:
@@ -75,7 +75,7 @@ class Emstore(object):
     def values(self):
         with self.db.iterator(include_key=False) as it:
             for value in it:
-                yield self.__read(v)
+                yield self.unpack(value)
 
     def __contains__(self, item):
         pass
