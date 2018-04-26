@@ -17,17 +17,20 @@ STRUCT_FORMAT = 'e'
 
 
 class VecIOWrapper(BufferedReader):
-    def __init__(self, *args, vector_size=None, **kwargs):
+    def __init__(self, *args, vector_size=None, fasttext_format=False, **kwargs):
         super().__init__(*args, **kwargs)
         if vector_size is None:
             try:
-                vector_size = self.infer_vector_size()
+                vector_size, fasttext_format = self.infer_vector_size()
             except UnsupportedOperation:
                 raise Exception(
                     '''Unable to infer vector size without read loss.
                     Please specify vector size''')
         self.vector_size = vector_size
         self.pack = struct.Struct(str(vector_size) + STRUCT_FORMAT).pack
+        if fasttext_format:
+            # pass first line
+            super().__next__()
 
     def __next__(self):
         line = super().__next__()[:-1]  # read and drop newline char
@@ -43,8 +46,14 @@ class VecIOWrapper(BufferedReader):
         # sample 1 entry
         first_line = super().readline()
         first_line = first_line.split(b' ')
+        fasttext_format = False
+        if len(first_line) == 2:
+            # could be a fasttext format file - read another line
+            first_line = super().readline()
+            first_line = first_line.split(b' ')
+            fasttext_format = True
         self.seek(0)
-        return len(first_line) - 1
+        return len(first_line) - 1, fasttext_format
 
 
 @contextmanager
@@ -80,20 +89,40 @@ def open_embeddings_file(path, vector_size=None, archive_file=None):
                 # sample 1 entry
                 first_line = g.readline()
                 first_line = first_line.split(b' ')
+                fasttext_format = False
+                if len(first_line) == 2:
+                    # could be a fasttext format file - read another line
+                    first_line = g.readline()
+                    first_line = first_line.split(b' ')
+                    fasttext_format = True
             vector_size = len(first_line) - 1
     except BadZipFile:
         file = path
         open_f = partial(open, mode='rb')
 
     with open_f(file) as g:
-        yield VecIOWrapper(g, vector_size=vector_size)
+        yield VecIOWrapper(g, vector_size=vector_size, 
+            fasttext_format=fasttext_format)
 
 
 def create_embedding_database(embeddings_file,
                               path_to_database,
                               datasize=None,
                               overwrite=False):
-    """Create embedding store in leveldb."""
+    """Create embedding store in leveldb.
+    
+    Arguments:
+        embeddings_file {str} --  path to downloaded GloVe embeddings. 'None'
+            will trigger download
+        path_to_database {str} -- Destination - where to create the embeddings     database. 'None' by default - builds in ~/glove
+    
+    Keyword Arguments:
+        datasize {int} -- number of lines if you want to see a progress bar when loading from a zip file (default: {None})
+        overwrite {bool} -- [description] (default: {False})
+    """
+
+
+    
     if overwrite:
         if os.path.exists(path_to_database):
             call(['rm', '-rf', path_to_database])
