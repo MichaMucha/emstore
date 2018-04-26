@@ -15,7 +15,7 @@ Still want fast lookup?
 * Easily initialize indexed word embedding databases on disk. Automatic vector size detection.
 * Create databases from whitespace-separated text files (reading ZIP archives supported) without hassle
 * Lazy-load embeddings instead of reading the entire file on startup.
-* LRU caching (1024 last words by default)
+* LRU caching (1024 most recent lookups by default)
 * Support for downloading GloVe embeddings
 * Emstore handles LevelDB locks and bytes IO for you
 
@@ -94,6 +94,23 @@ python setup.py install
 ```
 
 Also see included docker-compose and Dockerfile.
+
+#### OS X
+
+This can be tricky due to dependencies.
+
+I was able to get everything to work by using this procedure:
+
+1. install leveldb with homebrew: `brew install leveldb`
+2. clone plyvel git repository and install from source:
+```shell
+git clone https://github.com/wbolster/plyvel.git
+cd plyvel
+make
+pip install .
+3. installing emstore with `pip install .` or `python setup.py install`
+```
+
 
 ## Dependencies
 
